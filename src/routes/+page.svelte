@@ -53,27 +53,84 @@
   async function handleSubmit(event) {
     event.preventDefault();
     const form = event.target;
-    console.log(event.target)
+    //console.log(event.target);
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData.entries());
-    console.log(data);
+    //console.log(data);
 
     const selectedStudents = [];
+    let StdStatus = false;
 
-    // loop through the checkboxes to find which students were selected
-    StudentsList.forEach((student) => {
-      const isChecked = form[student.id].checked;
-      if (isChecked) {
-        // add the selected student to the array
-        selectedStudents.push({
-          id: student.id,
-          name: student.name,
-          department: student.department,
-          grade_level: student.grade_level,
-          status: isChecked,
-        });
+    for (var i = 0; i < StudentsList.length; i++) {
+      // var date = document.querySelectorAll(`input[name='date']`);
+      var date = document.getElementById("date").value;
+      //console.log(date)
+      var period = document.getElementById("period").value;
+      //console.log(StudentsList[i].id)
+      var StdId = StudentsList[i].id;
+      //var StdName = document.querySelectorAll(`input[name='name_${StdId}']`);
+      var StdName = document.getElementById(`name_${StdId}`).value;
+      //var Class_Id = document.querySelectorAll(`input[name='Class_Id_${StdId}']`)
+      var Class_Id = document.getElementById(`Class_Id_${StdId}`).value;
+      // if(document.querySelectorAll(`input[name='Status_${StdId}']`)){
+      //     StdStatus = true;
+      // }else{
+      //     StdStatus = false;
+      // }
+
+      console.log(document.getElementById(`Status_${StdId}`).value);
+
+      if (document.getElementById(`Status_${StdId}`).checked) {
+        StdStatus = true;
+      } else {
+        StdStatus = false;
       }
-    });
+
+      // if (document.getElementById(`Status_${StdId}`).value) {
+      //   StdStatus = true;
+      // } else {
+      //   StdStatus = false;
+      // }
+
+      var StdObj = {
+        Class_Id: Class_Id,
+        Stud_Id: StdId,
+        date: date,
+        period: period,
+        status: StdStatus,
+        name: StdName,
+      };
+
+      // console.table(StdObj)
+
+      selectedStudents.push(StdObj);
+    }
+
+    console.log(selectedStudents);
+
+    const { datas, error } = await supabase
+      .from("Attendance")
+      .insert(selectedStudents);
+    if (error) {
+      console.log(Error);
+    } else {
+      console.log(datas);
+    }
+
+    // // loop through the checkboxes to find which students were selected
+    // StudentsList.forEach((student) => {
+    //   const isChecked = form[student.id].checked;
+    //   if (isChecked) {
+    //     // add the selected student to the array
+    //     selectedStudents.push({
+    //       id: student.id,
+    //       name: student.name,
+    //       department: student.department,
+    //       grade_level: student.grade_level,
+    //       status: isChecked,
+    //     });
+    //   }
+    // });
 
     console.table(selectedStudents);
 
@@ -143,72 +200,47 @@
         <tr>
           <th>ID</th>
           <th>Name</th>
-          <th>Department</th>
-          <th>Grade Level</th>
           <th>Status</th>
         </tr>
       </thead>
       <tbody>
-
         {#each StudentsList as student, i}
-        <tr id={`student_${i}`}>
-          <td style="text-align: center; padding: 5px;">
-            <input type="text" name="Stud_Id" readonly value="{student.id}" />
-          </td>
-          <td style="text-align: center; padding: 5px;">
-            <input type="text" name="name" readonly value="{student.name}" />
-          </td>
-          <td style="text-align: center; padding: 5px;">
-            <input type="text" name="department" readonly value="{student.department}" />
-          </td>
-          <td style="text-align: center; padding: 5px;">
-            <input type="text" name="grade_level" readonly value="{student.grade_level}" />
-          </td>
-          <td style="text-align: center; padding: 5px;">
-            <input type="checkbox" name="Status" />
-          </td>
-        </tr>
-      {/each}
-
-        <!-- {#each StudentsList as student}
-          <tr>
-            <td style="text-align: center; padding: 5px;"
-              ><input
+          <tr id={`student_${i}`}>
+            <td style="text-align: center; padding: 5px;">
+              <input
                 type="text"
-                name="Stud_Id"
+                name={`Stud_Id_${student.id}`}
                 readonly
                 value={student.id}
-              /></td
-            >
-            <td style="text-align: center; padding: 5px;"
-              ><input
+              />
+              <input
                 type="text"
-                name="name"
+                id={`Class_Id_${student.id}`}
+                name={`Class_Id_${student.id}`}
+                readonly
+                hidden
+                value={student.Class_Id}
+              />
+            </td>
+            <td style="text-align: center; padding: 5px;">
+              <input
+                type="text"
+                id={`name_${student.id}`}
+                name={`name_${student.id}`}
                 readonly
                 value={student.name}
-              /></td
-            >
-            <td style="text-align: center; padding: 5px;"
-              ><input
-                type="text"
-                name="department"
-                readonly
-                value={student.department}
-              /></td
-            >
-            <td style="text-align: center; padding: 5px;"
-              ><input
-                type="text"
-                name="grade_level"
-                readonly
-                value={student.grade_level}
-              /></td
-            >
-            <td style="text-align: center; padding: 5px;"
-              ><input type="checkbox" name="Status" /></td
-            >
+              />
+            </td>
+            <td style="text-align: center; padding: 5px;">
+              <input
+                type="checkbox"
+                id={`Status_${student.id}`}
+                name={`Status_${student.id}`}
+                value="true"
+              />
+            </td>
           </tr>
-        {/each} -->
+        {/each}
       </tbody>
     </table>
 
